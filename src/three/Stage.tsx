@@ -9,7 +9,7 @@ import { useStore, type View } from '../store';
 const MODEL_URL = `${import.meta.env.BASE_URL}models/michelle.json`;
 
 const VIEWS: Record<View, { pos: [number, number, number]; target: [number, number, number] }> = {
-  front: { pos: [-0.12, 1.42, 1.9], target: [-0.08, 1.36, 0] },
+  front: { pos: [0, 1.32, 2.75], target: [-0.03, 1.2, 0] },
   side: { pos: [-1.6, 1.48, 1.2], target: [-0.1, 1.38, 0.1] },
   hand: { pos: [-0.38, 1.47, 1.08], target: [-0.2, 1.42, 0.27] },
 };
@@ -46,7 +46,7 @@ export function Stage() {
   const customModel = useStore((s) => s.customModel);
   const url = customModel ?? MODEL_URL;
   return (
-    <Canvas shadows="percentage" camera={{ position: VIEWS.front.pos, fov: 30 }}>
+    <Canvas shadows="percentage" camera={{ position: VIEWS.front.pos, fov: 30 }} onCreated={({ camera }) => camera.lookAt(...VIEWS.front.target)}>
       <Environment resolution={256} frames={1}>
         <Lightformer form="rect" intensity={4.5} position={[-1.5, 2.2, 3]} scale={[3, 2, 1]} target={[0, 1.4, 0]} />
         <Lightformer form="rect" intensity={1.6} position={[3, 1.8, 2]} scale={[2, 3, 1]} target={[0, 1.4, 0]} color="#ffe4d0" />

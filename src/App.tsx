@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Stage } from './three/Stage';
 import { MenuBar } from './MenuBar';
+import { Wave } from './Wave';
 import { useStore } from './store';
 import { useSpeechRecognition } from './hooks/useSpeechRecognition';
 
@@ -40,9 +41,11 @@ export default function App() {
 
 function MainView() {
   const [text, setText] = useState('');
-  const { playing, tokens, words, current, sign, enqueue, stop } = useStore();
+  const [toast, setToast] = useState('');
+  const { playing, tokens, words, current, sign, enqueue, stop, set } = useStore();
   const mic = useSpeechRecognition(enqueue, 'en-US');
   const tok = current >= 0 ? tokens[current] : null;
+  const progress = playing && tokens.length ? (current + 1) / tokens.length : 0;
 
   const submit = () => {
     if (!text.trim()) return;
@@ -50,48 +53,77 @@ function MainView() {
     setText('');
   };
 
+  const clear = () => {
+    stop();
+    set({ words: [], tokens: [] });
+  };
+
+  const share = async () => {
+    const url = location.href.split('#')[0];
+    try {
+      await navigator.clipboard.writeText(url);
+      setToast('Link copied');
+    } catch {
+      setToast(url);
+    }
+    setTimeout(() => setToast(''), 2200);
+  };
+
   return (
-    <div className="app">
-      <header>
-        <h1>🤟 SignSpeak</h1>
+    <div className="screen">
+      <Stage />
+
+      <div className="top-left">
         <MenuBar />
-      </header>
-      <p className="sub">Speak or type, and she signs it in ASL.</p>
-
-      <div className="stage">
-        <Stage />
-        {tok && tok.kind !== 'pause' && <div className="letter">{tok.label}</div>}
       </div>
+      <button className="close" onClick={clear} title="Stop and clear">
+        ✕
+      </button>
 
-      <div className="words">
+      {/* caption: the sentence, with the word and letter being signed highlighted */}
+      <div className="caption">
         {words.map((w, i) => (
           <span key={i} className={tok?.wordIndex === i ? 'on' : ''}>
-            {w.text}
+            {w.kind === 'spelled' && tok?.wordIndex === i && tok.kind === 'letter'
+              ? [...w.text].map((c, ci) => (
+                  <b key={ci} className={ci === tok.charIndex ? 'cur' : ''}>
+                    {c}
+                  </b>
+                ))
+              : w.text}
           </span>
         ))}
       </div>
 
-      <div className="controls">
-        <button className={`mic ${mic.listening ? 'live' : ''}`} onClick={mic.listening ? mic.stop : mic.start} title="Speak">
-          🎤
-        </button>
+      <Wave listening={mic.listening} />
+
+      <div className="panel">
         <input
           value={text}
           onChange={(e) => setText(e.target.value)}
           onKeyDown={(e) => e.key === 'Enter' && submit()}
-          placeholder={mic.listening ? 'Listening… ' + mic.interim : 'Type something, e.g. Hello'}
+          placeholder={mic.listening ? mic.interim || 'Listening…' : 'Type your message…'}
         />
-        <button onClick={submit}>Sign</button>
-        {playing && <button onClick={stop}>Stop</button>}
+        <div className="track">
+          <i style={{ width: `${progress * 100}%` }} />
+        </div>
+        <div className="panel-row">
+          <span className="hint">{mic.error ? 'Voice needs Chrome or Edge (HTTPS). Typing works everywhere.' : playing ? 'Signing…' : 'Press Enter or tap the mic'}</span>
+          <button className={`mic ${mic.listening ? 'live' : ''}`} onClick={mic.listening ? mic.stop : mic.start} title={mic.listening ? 'Stop listening' : 'Speak'}>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+              <rect x="9" y="3" width="6" height="11" rx="3" />
+              <path d="M5 11a7 7 0 0 0 14 0M12 18v3" />
+            </svg>
+          </button>
+          <button className="icon" onClick={share} title="Copy link">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M14 4h6v6M20 4l-9 9M18 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h5" />
+            </svg>
+          </button>
+        </div>
       </div>
 
-      {mic.error && (
-        <p className="note">
-          {mic.error === 'unsupported' || mic.error === 'blocked'
-            ? 'Voice needs Chrome or Edge on localhost. Typing works everywhere.'
-            : `Mic error: ${mic.error}`}
-        </p>
-      )}
+      {toast && <div className="toast">{toast}</div>}
     </div>
   );
 }
