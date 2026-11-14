@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { Stage } from './three/Stage';
 import { MenuBar } from './MenuBar';
 import { Wave } from './Wave';
+import { SignCamera } from './recognize/SignCamera';
 import { useStore } from './store';
 import { useSpeechRecognition } from './hooks/useSpeechRecognition';
 
@@ -40,6 +41,7 @@ export default function App() {
 }
 
 function MainView() {
+  const [mode, setMode] = useState<'speak' | 'sign'>('speak');
   const [text, setText] = useState('');
   const [toast, setToast] = useState('');
   const { playing, tokens, words, current, sign, enqueue, stop, set } = useStore();
@@ -97,7 +99,11 @@ function MainView() {
 
       <Wave listening={mic.listening} />
 
-      <div className="panel">
+      {mode === 'sign' ? (
+        <SignCamera onSignBack={(t) => sign(t)} tabs={<ModeTabs mode={mode} setMode={setMode} />} />
+      ) : (
+        <div className="panel">
+          <ModeTabs mode={mode} setMode={setMode} />
         <input
           value={text}
           onChange={(e) => setText(e.target.value)}
@@ -121,9 +127,23 @@ function MainView() {
             </svg>
           </button>
         </div>
-      </div>
+        </div>
+      )}
 
       {toast && <div className="toast">{toast}</div>}
+    </div>
+  );
+}
+
+function ModeTabs({ mode, setMode }: { mode: 'speak' | 'sign'; setMode: (m: 'speak' | 'sign') => void }) {
+  return (
+    <div className="modes">
+      <button className={mode === 'speak' ? 'on' : ''} onClick={() => setMode('speak')}>
+        🗣️ Speak → Sign
+      </button>
+      <button className={mode === 'sign' ? 'on' : ''} onClick={() => setMode('sign')}>
+        🤟 Sign → Text
+      </button>
     </div>
   );
 }

@@ -11,7 +11,7 @@ const MODEL_URL = `${import.meta.env.BASE_URL}models/michelle.json`;
 const VIEWS: Record<View, { pos: [number, number, number]; target: [number, number, number] }> = {
   front: { pos: [0, 1.32, 2.75], target: [-0.03, 1.2, 0] },
   side: { pos: [-1.6, 1.48, 1.2], target: [-0.1, 1.38, 0.1] },
-  hand: { pos: [-0.38, 1.47, 1.08], target: [-0.2, 1.42, 0.27] },
+  hand: { pos: [-0.36, 1.36, 1.2], target: [-0.2, 1.3, 0.27] },
 };
 
 /** Smoothly moves the camera when the View menu changes. */
