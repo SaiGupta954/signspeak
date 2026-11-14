@@ -19,6 +19,7 @@ interface State {
   history: string[];
   customModel: string | null;
   modelError: string | null;
+  modelReady: boolean;
 
   sign: (text: string, save?: boolean) => void;
   enqueue: (text: string) => void;
@@ -39,6 +40,7 @@ export const useStore = create<State>()((set, get) => ({
   history: [],
   customModel: null,
   modelError: null,
+  modelReady: false,
 
   sign: (text, save = true) => {
     const seq = sequence(text, get().useWordSigns);

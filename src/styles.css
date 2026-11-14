@@ -42,3 +42,7 @@ header { display: flex; align-items: center; justify-content: space-between; gap
 .error { color: #ff9b8a; font-size: 13px; margin: 6px 10px; }
 .help p { margin: 8px 10px; font-size: 14px; line-height: 1.45; }
 .help { width: 280px; }
+
+/* ---------- recording mode (#record) ---------- */
+.record { position: fixed; inset: 0; cursor: none; background: radial-gradient(circle at 50% 35%, #2a3570, #10153a); }
+.record .letter { top: 4vh; right: 5vw; font-size: 14vh; }

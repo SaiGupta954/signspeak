@@ -47,7 +47,7 @@ export function HumanAvatar({ url }: { url: string }) {
   }, [gltf.scene]);
 
   useEffect(() => {
-    useStore.setState({ modelError: error });
+    useStore.setState({ modelError: error, modelReady: !!rig });
     if (rig && import.meta.env.DEV) Object.assign(window, { __rig: rig });
   }, [rig, error]);
 

@@ -14,6 +14,10 @@ npm run dev
 
 Open the URL in Chrome or Edge. The 🎤 button needs the microphone, which works on localhost.
 
+## Recording mode
+
+Open the site with `#record` at the end of the URL, for example https://saigupta954.github.io/signspeak/#record. Only the signer is shown, the cursor is hidden, and "Hello, nice to meet you" plays automatically. Use `#record=Your phrase` for a different phrase. Click anywhere to replay.
+
 ## Files
 
 ```
