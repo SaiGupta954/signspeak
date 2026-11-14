@@ -3,6 +3,7 @@ import { Stage } from './three/Stage';
 import { MenuBar } from './MenuBar';
 import { Wave } from './Wave';
 import { SignCamera } from './recognize/SignCamera';
+import { prefetchHands } from './recognize/useSignRecognizer';
 import { useStore } from './store';
 import { useSpeechRecognition } from './hooks/useSpeechRecognition';
 
@@ -41,12 +42,26 @@ export default function App() {
 }
 
 function MainView() {
-  const [mode, setMode] = useState<'speak' | 'sign'>('speak');
+  const [mode, setModeRaw] = useState<'speak' | 'sign'>('speak');
   const [text, setText] = useState('');
   const [toast, setToast] = useState('');
   const { playing, tokens, words, current, sign, enqueue, stop, set } = useStore();
   const mic = useSpeechRecognition(enqueue, 'en-US');
   const tok = current >= 0 ? tokens[current] : null;
+  const modelReady = useStore((s) => s.modelReady);
+
+  const setMode = (m: 'speak' | 'sign') => {
+    if (m === 'sign' && mic.listening) mic.stop(); // don't keep listening in the background
+    setModeRaw(m);
+  };
+
+  // once the avatar has loaded, quietly download hand tracking so Sign → Text opens fast
+  useEffect(() => {
+    if (!modelReady) return;
+    const id = setTimeout(prefetchHands, 2000);
+    return () => clearTimeout(id);
+  }, [modelReady]);
+
   const progress = playing && tokens.length ? (current + 1) / tokens.length : 0;
 
   const submit = () => {
@@ -72,8 +87,8 @@ function MainView() {
   };
 
   return (
-    <div className="screen">
-      <Stage />
+    <div className={`screen ${mode}`} data-ready={modelReady ? "yes" : "no"}>
+      <Stage eco={mode === 'sign'} />
 
       <div className="top-left">
         <MenuBar />

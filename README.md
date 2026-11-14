@@ -20,6 +20,16 @@ Switch to **🤟 Sign → Text** in the bottom panel and allow the camera. Finge
 
 Hand tracking uses Google's MediaPipe Hands, hosted on this site and running entirely in the browser (camera video never leaves the device). Letters are matched with hand-shape rules in `src/recognize/classify.ts`. It reads still letters (not J or Z) and works best with good light, one hand, palm facing the camera. It's a learning demo, not a full sign-language translator.
 
+## Tests
+
+```bash
+npm test            # 65 unit tests: text → signs, timing, store, letter recognition, hold-to-type
+npm run build
+npm run test:e2e    # 18 browser tests: typing, menus, history, views, record mode, Sign → Text with a fake camera
+```
+
+Every push to `main` runs the type check, unit tests, build and browser tests on GitHub Actions, and only deploys if they all pass.
+
 ## Recording mode
 
 Open the site with `#record` at the end of the URL, for example https://saigupta954.github.io/signspeak/#record. Only the signer is shown, the cursor is hidden, and "Hello, nice to meet you" plays automatically. Use `#record=Your phrase` for a different phrase. Click anywhere to replay.

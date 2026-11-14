@@ -103,19 +103,18 @@ export function classify(world: Pt[], image: Pt[]): string | null {
   }
 
   if (ext[0] && curled[1] && curled[2] && curled[3]) return f.thumbOut ? 'L' : 'D';
-  if (f.hook && R === 'curl' && P === 'curl' && f.indexTipY > 1.15) return 'X';
+  if (f.hook && R === 'curl' && P === 'curl' && f.indexTipY > 0.95) return 'X';
   if (ext[3] && curled[0] && curled[1] && curled[2]) return f.thumbOut ? 'Y' : 'I';
 
   // rounded shapes: fingers bent but not closed into a fist
   const mean = f.straight.reduce((a, b) => a + b, 0) / 4;
   if (!f.state.includes('curl') && !ext.some(Boolean) && mean > 0.6) {
     const gap = dist(world[TH.tip], world[8]) / f.palm;
-    if (gap < 0.55) return 'O';
-    if (gap < 1.3) return 'C';
+    return gap < 0.55 ? 'O' : 'C';
   }
 
-  // fist family: tell apart by where the thumb tip is
-  if (curled.every(Boolean)) {
+  // fist family: fingers really closed; tell apart by where the thumb tip is
+  if (curled.every(Boolean) && f.straight.every((x) => x < 0.8)) {
     const { sx, ty } = f.thumb;
     if (sx > 1.0 && ty > 0.5) return 'A';
     if (I === 'curl' && ty < 0.55 && f.straight[0] > 0.45 && dist(world[8], world[TH.tip]) / f.palm < 0.55) return 'E';

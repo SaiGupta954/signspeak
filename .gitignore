@@ -2,3 +2,4 @@ node_modules
 dist
 dist-single
 public/mediapipe
+e2e/fail-*.png

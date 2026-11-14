@@ -18,6 +18,7 @@ export function SignCamera({ onSignBack, tabs }: { onSignBack: (text: string) =>
         <canvas ref={r.canvas} width={640} height={480} />
         {r.status === 'loading' && <div className="cam-msg">Starting camera and hand tracking…</div>}
         {r.status === 'error' && <div className="cam-msg err">{r.error}</div>}
+        {r.status === 'ready' && <div className="fps">{r.fps} fps</div>}
         {r.status === 'ready' && (
           <div className="guess">
             <svg viewBox="0 0 36 36">

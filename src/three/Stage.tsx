@@ -1,5 +1,6 @@
 import { Suspense, useEffect, useRef } from 'react';
 import { Canvas, useFrame, useThree } from '@react-three/fiber';
+import { driver } from '../sign/driver';
 import { Environment, Lightformer, OrbitControls } from '@react-three/drei';
 import * as THREE from 'three';
 import type { OrbitControls as OrbitControlsImpl } from 'three-stdlib';
@@ -42,11 +43,38 @@ function Camera() {
   return <OrbitControls ref={controls} enablePan={false} minDistance={0.5} maxDistance={3.5} onStart={() => (moving.current = false)} />;
 }
 
-export function Stage() {
+/**
+ * Eco mode: render the 3D scene on demand at a lower frame rate so the webcam
+ * and hand tracking get most of the computer's power. Full speed while signing.
+ */
+function EcoTicker() {
+  const { invalidate, gl } = useThree();
+  useEffect(() => {
+    gl.shadowMap.enabled = false;
+    let last = 0;
+    let raf = 0;
+    const tick = (t: number) => {
+      const fps = driver.playing ? 30 : 6;
+      if (t - last > 1000 / fps) {
+        last = t;
+        invalidate();
+      }
+      raf = requestAnimationFrame(tick);
+    };
+    raf = requestAnimationFrame(tick);
+    return () => {
+      cancelAnimationFrame(raf);
+      gl.shadowMap.enabled = true;
+    };
+  }, [invalidate, gl]);
+  return null;
+}
+
+export function Stage({ eco = false }: { eco?: boolean }) {
   const customModel = useStore((s) => s.customModel);
   const url = customModel ?? MODEL_URL;
   return (
-    <Canvas shadows="percentage" camera={{ position: VIEWS.front.pos, fov: 30 }} onCreated={({ camera }) => camera.lookAt(...VIEWS.front.target)}>
+    <Canvas shadows="percentage" frameloop={eco ? 'demand' : 'always'} dpr={eco ? 1 : [1, 2]} camera={{ position: VIEWS.front.pos, fov: 30 }} onCreated={({ camera }) => camera.lookAt(...VIEWS.front.target)}>
       <Environment resolution={256} frames={1}>
         <Lightformer form="rect" intensity={4.5} position={[-1.5, 2.2, 3]} scale={[3, 2, 1]} target={[0, 1.4, 0]} />
         <Lightformer form="rect" intensity={1.6} position={[3, 1.8, 2]} scale={[2, 3, 1]} target={[0, 1.4, 0]} color="#ffe4d0" />
@@ -59,6 +87,7 @@ export function Stage() {
         <HumanAvatar key={url} url={url} />
       </Suspense>
       <Camera />
+      {eco && <EcoTicker />}
     </Canvas>
   );
 }
