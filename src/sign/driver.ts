@@ -87,7 +87,7 @@ export class SignDriver {
 
   /** Advance by dt milliseconds. `speed` is letters per second. */
   tick(dtMs: number, speed: number): HandPose {
-    const dt = Math.min(dtMs, 100); // don't jump after a tab switch
+    const dt = Math.min(dtMs, 250); // keep pace on slow machines, but don't jump after a tab switch
     if (this.playing && !this.paused) {
       this.elapsed += dt;
       const fr = this.frames[this.fi];

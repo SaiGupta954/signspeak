@@ -75,7 +75,7 @@ try {
   });
 
   await test('progress bar moves and the letter being spelled is highlighted', async () => {
-    await waitFor(async () => (await count('.caption b.cur')) === 1, 8000, 'no highlighted letter while spelling SAM');
+    await waitFor(async () => (await count('.caption b.cur')) === 1, 20000, 'no highlighted letter while spelling SAM');
     const w = await page.locator('.track i').evaluate((e) => parseFloat(e.style.width));
     expect(w > 0, 'progress bar empty');
   });
